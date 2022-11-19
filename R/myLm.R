@@ -13,7 +13,7 @@
 #'fit <- myLm(formula = Murder ~ Rape, data = USArrests)
 #'
 #'fit$Coefficients
-#'fit$Fstatistic
+#'fit$F.statistic
 #'
 #'@export
 #'
@@ -34,6 +34,12 @@ myLm = function(formula, data) {
   betahat = solve(t(X)%*%X)%*%t(X)%*%Y
   Yhat = X%*%betahat
   epsilonhat = Y - Yhat ## residual
+
+  res = as.vector(epsilonhat)
+  names(res) <- row.names(data)
+
+  residuals = quantile(epsilonhat)
+  names(residuals) = c("Min", "1Q", "Median", "3Q", "Max")
 
 
   ## estimated sigma^2
@@ -75,16 +81,16 @@ myLm = function(formula, data) {
 
 
   #combine parameter estimate and inferences into a vector
-  result = cbind(Estimate=c(betahat),
-                 Std_Err=se_betahat,
-                 t_statistic=t_statistic,
-                 p_value=p_value)
+
+  result <- data.frame("Estimate" = c(betahat), "Std. Error" = se_betahat,
+                      "t value" = t_statistic, "Pr(>|t|)" =p_value, check.names = FALSE)
+
 
   #return a list to include everything
-  summary = list(result, Rsquared, adj_Rsquared, Ftest)
+  ret = list(X, res, residuals, result, Rsquared, adj_Rsquared, Ftest)
 
-  names(summary) = c("Coefficients", "Multiple.R-squared", "Adjusted.Rsquared", "Fstatistic")
+  names(ret) = c("model","residuals","Residuals", "Coefficients", "Multiple.Rsquared", "Adjusted.Rsquared", "F.statistic")
 
-  return(summary)
+  return(ret)
 
 }

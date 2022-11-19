@@ -21,6 +21,6 @@ mimic the lm() function in R, used to fit linear modals. output according statis
 fit <- myLm(formula = Murder ~ Rape, data = USArrests)
 
 fit$Coefficients
-fit$Fstatistic
+fit$F.statistic
 
 }
