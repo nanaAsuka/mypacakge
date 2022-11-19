@@ -7,7 +7,7 @@
 #'@param data data frame containing variables in the modal being fitted.
 #'
 #'
-#'@return a list consisting of Coefficients and their corresponding standard error, t statistic and p-value. R squared and f statistic.
+#'@return a list consisting of fitted values, coefficients, residuals and its degree freedom, t statistic, f statistic and their corresponding p-value. adjusted  R squared, multiple R squared.
 #'
 #'@examples
 #'fit <- myLm(formula = Murder ~ Rape, data = USArrests)
@@ -22,9 +22,8 @@ myLm = function(formula, data) {
   data = na.omit(data)
   vars = all.vars(formula)
 
-
   #### define design matrix, outcome, dimensions ####
-  X = model.matrix(formula, data = data)
+  X = model.matrix(formula, data)
 
   Y = as.matrix(data[,which(colnames(data) == vars[1])])
   n = nrow(X)
@@ -34,6 +33,9 @@ myLm = function(formula, data) {
   betahat = solve(t(X)%*%X)%*%t(X)%*%Y
   Yhat = X%*%betahat
   epsilonhat = Y - Yhat ## residual
+
+  fittedvals = as.vector(Yhat)
+  names(fittedvals) = row.names(data)
 
   res = as.vector(epsilonhat)
   names(res) <- row.names(data)
@@ -66,7 +68,9 @@ myLm = function(formula, data) {
   MSE = SSE/dfSSE
   MSR = SSR/dfSSR
 
-  Fstat = round(MSR/MSE, digits = 2)
+  Fstat = MSR/MSE
+  Fstat_vec = c(Fstat, dfSSR, dfSSE)
+  names(Fstat_vec) = c('value', 'numdf', 'dendf')
 
   F_pval = 1-pf(q=Fstat,df1=dfSSR,df2=dfSSE)
 
@@ -87,9 +91,9 @@ myLm = function(formula, data) {
 
 
   #return a list to include everything
-  ret = list(X, res, residuals, result, Rsquared, adj_Rsquared, Ftest)
+  ret = list(res, fittedvals,  residuals, dfSSE, result, Rsquared, adj_Rsquared, Fstat_vec, Ftest)
 
-  names(ret) = c("model","residuals","Residuals", "Coefficients", "Multiple.Rsquared", "Adjusted.Rsquared", "F.statistic")
+  names(ret) = c("residuals", "fitted.values", "Residuals", "df.residual","Coefficients", "Multiple.Rsquared", "Adjusted.Rsquared", "F.statistic", "Ftest")
 
   return(ret)
 

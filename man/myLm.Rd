@@ -12,7 +12,7 @@ myLm(formula, data)
 \item{data}{data frame containing variables in the modal being fitted.}
 }
 \value{
-a list consisting of Coefficients and their corresponding standard error, t statistic and p-value. R squared and f statistic.
+a list consisting of fitted values, coefficients, residuals and its degree freedom, t statistic, f statistic and their corresponding p-value. adjusted  R squared, multiple R squared.
 }
 \description{
 mimic the lm() function in R, used to fit linear modals. output according statistics given the data and formula being provided
