@@ -14,6 +14,97 @@ knitr::opts_chunk$set(
 )
 ```
 
+
+## Overview
+
+mypackage is a simple tool to perform linear model fitting and can achieve efficient simple analysis. It has one main function `myLm()`. The purpose of this vignette is to demonstrate some usage examples of `myLm()` based on the data set `USArrests`, and do some benchmark against the built-in r function `lm()`
+
+## Requirements
+
+To get started, you will need to install and load a few packages:
+
 ```{r setup}
 library(mypackage)
+library(bench)
 ```
+
+
+## Example Usage for function `myLm()`
+
+From the below demonstration we can see that `myLm()` produces the same result as `lm()` does
+
+**Result from `myLm()`**
+```{r}
+
+m1 = myLm(Murder~Rape, USArrests)
+
+m1$Residuals
+m1$df.residual
+m1$Ftest
+m1$F.statistic
+m1$residuals
+m1$Multiple.Rsquared
+m1$Adjusted.Rsquared
+
+```
+
+```{r}
+m1$Coefficients
+
+```
+
+**Result from `summary(lm())`**
+
+```{r}
+lm(Murder~Rape, USArrests)$residuals
+summary(lm(Murder~Rape, USArrests))
+```
+
+
+
+## How does it compare with lm( )? 
+
+First let's build two models using lm() and myLm() respectively
+
+```{r, fig.align ='center', fig.width= 6, fig.height = 3}
+m1_bylm = lm(formula = Murder~Rape+Assault, data = USArrests)
+
+m2_bymyLm = myLm(formula = Murder~Rape+Assault,data = USArrests)
+
+```
+
+
+**Comparing Performance on Obtaining Residuals**
+
+```{r, fig.align ='center', fig.width= 6, fig.height = 3}
+benchmark = bench::mark(m1_bylm$residuals, m2_bymyLm$residuals)
+print(benchmark)
+ggplot2::autoplot(benchmark)
+```
+
+
+**Comparing Performance on Obtaining coefficients**
+
+```{r, fig.align ='center', fig.width= 6, fig.height = 3}
+benchmark = bench::mark(as.matrix(summary(m1_bylm)$coefficients),
+                        as.matrix(m2_bymyLm$Coefficients))
+print(benchmark)
+ggplot2::autoplot(benchmark)
+```
+
+
+
+**Comparing Performance on Obtaining fitted.values**
+
+
+```{r, fig.align ='center', fig.width= 6, fig.height = 3}
+benchmark = bench::mark(m1_bylm$fitted.values, m2_bymyLm$fitted.values)
+print(benchmark)
+ggplot2::autoplot(benchmark)
+```
+
+
+The above three plots clearly shows that `myLm()` outperforms `lm( )` in cases dealing with simple analysis. 
+
+
+
